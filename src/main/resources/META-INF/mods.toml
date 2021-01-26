@@ -1,13 +1,13 @@
 modLoader="javafml"
 loaderVersion="[${loader_version},)"
 license="All rights reserved"
-issueTrackerURL="https://github.com/MeinKraft/" #optional
+issueTrackerURL="https://github.com/MeinKraft/Crimson-Shears" #optional
 
 [[mods]]
 modId="crimsonshears"
 version="${version}"
 displayName="Crimson Shears"
-displayURL="https://www.curseforge.com/minecraft/mc-mods/"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/crimson-shears"
 authors="§4Crimson_Fluff"
 logoFile="logo.png" #optional
 credits="\n§bTechnovision§r for his awesome modding YouTube series\n§bTurtyWurty§r for his awesome modding YouTube series" #optional
@@ -18,7 +18,7 @@ description=''' "You can't be serious? And don't call me shearly !" '''
     mandatory=true
     versionRange="[${mc_version}]"
     side="BOTH"
-[[dependencies.crimsoncoals]]
+[[dependencies.crimsonshears]]
     modId="forge"
     mandatory=true
     versionRange="[${forge_version},)"
