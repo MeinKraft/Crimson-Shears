@@ -1,6 +1,7 @@
 package crimsonfluff.crimsonshears;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.block.GrassBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
@@ -15,10 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -82,6 +80,7 @@ public class CrimsonShears {
                 if (world.getBlockState(pos).getBlock() instanceof GrassBlock) {
                     player.swing(player.getActiveHand(), true);
                     world.playSound(null, pos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.BLOCKS, 1f, 1f);
+
                     world.addEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.GRASS)));
 
                     // .damageItem checks for Creative mode !
@@ -247,8 +246,9 @@ public class CrimsonShears {
                     // NOTE: If holding carrot in OFF_HAND and use shears, the carrots will animate arm swing -
                     // can this be stopped?
                     Hand handIn = (player.getHeldItem(Hand.MAIN_HAND) == player.inventory.getCurrentItem()) ? Hand.MAIN_HAND : Hand.OFF_HAND;
-
+                    //player.setActiveHand(handIn);
                     player.swing(handIn, true);
+
                     world.playSound(null, pos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
 
                     // .damageItem checks for Creative mode !
