@@ -23,7 +23,7 @@ public class ConfigBuilder {
     public ForgeConfigSpec.BooleanValue ShearSquid;
     public ForgeConfigSpec.BooleanValue ShearPiglin;
     public ForgeConfigSpec.BooleanValue ShearHogZog;
-
+    public ForgeConfigSpec.BooleanValue ShearCow;
 
     public ConfigBuilder() {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -102,6 +102,10 @@ public class ConfigBuilder {
         ShearHogZog = builder
                 .comment("Should Hoglins/Zoglins be shearable ?  Default: true")
                 .define("ShearHogZog", true);
+
+        ShearCow = builder
+                .comment("Should Cows be shearable ?  Default: true")
+                .define("ShearCow", true);
 
 
         builder.pop();

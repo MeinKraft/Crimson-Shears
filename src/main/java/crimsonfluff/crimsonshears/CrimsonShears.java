@@ -1,7 +1,6 @@
 package crimsonfluff.crimsonshears;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.block.GrassBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
@@ -16,7 +15,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.*;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -126,7 +128,7 @@ public class CrimsonShears {
                             if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) return;
 
                         item = Items.RABBIT_HIDE;
-                        intDamageAmount = 1;
+                        intDamageAmount = 2;
                     }
                 }
 
@@ -136,14 +138,14 @@ public class CrimsonShears {
                             if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) return;
 
                         item = Items.FEATHER;
-                        intDamageAmount = 1;
+                        intDamageAmount = 2;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearParrot.get()) {
                     if (living instanceof ParrotEntity) {
                         item = Items.FEATHER;
-                        intDamageAmount = 1;
+                        intDamageAmount = 2;
                     }
                 }
 
@@ -236,6 +238,13 @@ public class CrimsonShears {
                 if (CrimsonShears.CONFIGURATION.ShearSquid.get()) {
                     if (living instanceof SquidEntity) {
                         item=Items.INK_SAC;
+                        intDamageAmount=2;
+                    }
+                }
+
+                if (CrimsonShears.CONFIGURATION.ShearCow.get()) {
+                    if (living instanceof CowEntity) {
+                        item=Items.LEATHER;
                         intDamageAmount=2;
                     }
                 }
