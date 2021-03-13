@@ -3,6 +3,7 @@ package crimsonfluff.crimsonshears;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.GrassBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
@@ -111,9 +112,14 @@ public class CrimsonShears {
                 }
 
                 Entity living = event.getTarget();
+                if (((LivingEntity) living).isChild())
+                    if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) {
+                        //CrimsonShears.LOGGER.info("NO BABIES !");
+                        return;
+                    }
+
                 int intDamageAmount = 0;
                 Item item = null;
-
 
                 if (CrimsonShears.CONFIGURATION.ShearSpider.get()) {
                     if (living instanceof SpiderEntity) {
@@ -124,9 +130,6 @@ public class CrimsonShears {
 
                 if (CrimsonShears.CONFIGURATION.ShearRabbit.get()) {
                     if (living instanceof RabbitEntity) {
-                        if (((RabbitEntity) living).isChild())
-                            if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) return;
-
                         item = Items.RABBIT_HIDE;
                         intDamageAmount = 2;
                     }
@@ -134,9 +137,6 @@ public class CrimsonShears {
 
                 if (CrimsonShears.CONFIGURATION.ShearChicken.get()) {
                     if (living instanceof ChickenEntity) {
-                        if (((ChickenEntity) living).isChild())
-                            if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) return;
-
                         item = Items.FEATHER;
                         intDamageAmount = 2;
                     }
@@ -158,56 +158,53 @@ public class CrimsonShears {
 
                 if (CrimsonShears.CONFIGURATION.ShearZombie.get()) {
                     if (living instanceof ZombieEntity) {
-                    item=Items.ROTTEN_FLESH;
-                    intDamageAmount=4;
+                        item = Items.ROTTEN_FLESH;
+                        intDamageAmount = 4;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearHorse.get()) {
                     if (living instanceof HorseEntity || living instanceof DonkeyEntity || living instanceof MuleEntity) {
-                        item=Items.LEATHER;
-                        intDamageAmount=6;
+                        item = Items.LEATHER;
+                        intDamageAmount = 6;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearPiglin.get()) {
                     if (living instanceof PiglinEntity || living instanceof PiglinBruteEntity) {
-                        item=Items.LEATHER;
-                        intDamageAmount=6;
+                        item = Items.LEATHER;
+                        intDamageAmount = 6;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearPig.get()) {
                     if (living instanceof PigEntity) {
-                        if (((PigEntity) living).isChild())
-                            if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) return;
-
-                        item=Items.LEATHER;
-                        intDamageAmount=4;
+                        item = Items.LEATHER;
+                        intDamageAmount = 4;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearHogZog.get()) {
                     if (living instanceof HoglinEntity) {
-                        item=Items.LEATHER;
-                        intDamageAmount=6;
+                        item = Items.LEATHER;
+                        intDamageAmount = 6;
                     }
                     if (living instanceof ZoglinEntity) {
-                        item=Items.ROTTEN_FLESH;
-                        intDamageAmount=6;
+                        item = Items.ROTTEN_FLESH;
+                        intDamageAmount = 6;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearSkeleton.get()) {
                     if (living instanceof SkeletonEntity) {
-                        item=Items.BONE;
-                        intDamageAmount=4;
-                    } else {
+                        item = Items.BONE;
+                        intDamageAmount = 4;
 
+                    } else {
                         // Add 'NastyMobs' compatibility
                         if (living.getClass().getSimpleName().equals("NastySkeletonEntity")) {
-                            item=Items.BONE;
-                            intDamageAmount=4;
+                            item = Items.BONE;
+                            intDamageAmount = 4;
                         }
 //                        player.sendStatusMessage(new StringTextComponent("ENTITY: " + living.getClass().getSimpleName()), false);
 //                        player.sendStatusMessage(new StringTextComponent("ENTITY: " + living.getClass().getTypeName()), false);
@@ -216,40 +213,40 @@ public class CrimsonShears {
 
                 if (CrimsonShears.CONFIGURATION.ShearCreeper.get()) {
                     if (living instanceof CreeperEntity) {
-                        item=Items.GUNPOWDER;
-                        intDamageAmount=4;
+                        item = Items.GUNPOWDER;
+                        intDamageAmount = 4;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearZombieHorse.get()) {
                     if (living instanceof ZombieHorseEntity) {
-                        item=Items.ROTTEN_FLESH;
-                        intDamageAmount=6;
+                        item = Items.ROTTEN_FLESH;
+                        intDamageAmount = 6;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearSkeletonHorse.get()) {
                     if (living instanceof SkeletonHorseEntity) {
-                        item=Items.BONE;
-                        intDamageAmount=6;
+                        item = Items.BONE;
+                        intDamageAmount = 6;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearSquid.get()) {
                     if (living instanceof SquidEntity) {
-                        item=Items.INK_SAC;
-                        intDamageAmount=2;
+                        item = Items.INK_SAC;
+                        intDamageAmount = 2;
                     }
                 }
 
                 if (CrimsonShears.CONFIGURATION.ShearCow.get()) {
                     if (living instanceof CowEntity) {
-                        item=Items.LEATHER;
-                        intDamageAmount=2;
+                        item = Items.LEATHER;
+                        intDamageAmount = 2;
                     }
                 }
 
-                if (intDamageAmount>0) {
+                if (intDamageAmount > 0) {
                     BlockPos pos = event.getPos();
 
                     // NOTE: If holding carrot in OFF_HAND and use shears, the carrots will animate arm swing -
@@ -265,7 +262,7 @@ public class CrimsonShears {
                         playerIn.sendBreakAnimation(handIn); });
 
                     living.attackEntityFrom(dm, intDamageAmount);
-                    ((ServerWorld) world).spawnParticle(ParticleTypes.CRIT, living.getPosX(), living.getPosY()+living.getEyeHeight(), living.getPosZ(), 10, 0.5,0.5,0.5,0);
+                    ((ServerWorld) world).spawnParticle(ParticleTypes.CRIT, living.getPosX(), living.getPosY() + living.getEyeHeight(), living.getPosZ(), 10, 0.5,0.5,0.5,0);
 
                     living.entityDropItem(new ItemStack(item));
 
