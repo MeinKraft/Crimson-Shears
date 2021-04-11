@@ -11,6 +11,7 @@ import net.minecraft.entity.monster.piglin.PiglinEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.passive.horse.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -26,12 +27,10 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,13 +39,12 @@ public class CrimsonShears {
     public static final String MOD_ID = "crimsonshears";
     public static final Logger LOGGER = LogManager.getLogger("crimsonshears");
     public static final ConfigBuilder CONFIGURATION = new ConfigBuilder();
-    final IEventBus MOD_EVENTBUS = FMLJavaModLoadingContext.get().getModEventBus();
 
     private int dedupe=0;
     private final DamageSource dm = new DamageSource("shears");   // death.attack.shears
 
     public CrimsonShears() {
-        dm.setDifficultyScaled();
+        dm.setScalesWithDifficulty();
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIGURATION.COMMON);
         MinecraftForge.EVENT_BUS.register(this);
@@ -56,12 +54,12 @@ public class CrimsonShears {
     public void onLivingEntityUpdate(LivingEvent.LivingUpdateEvent event) {
         if (!CrimsonShears.CONFIGURATION.ChickenFeatherDrop.get()) return;
 
-        if (!event.getEntity().getEntityWorld().isRemote) {
+        if (!event.getEntity().level.isClientSide()) {
             Entity living = event.getEntity();
 
             if (living instanceof ChickenEntity) {
                 // Instead of a random number every tick, drop at same time as egg?
-                if (living.world.rand.nextInt(6000) == 0) living.entityDropItem(new ItemStack(Items.FEATHER));
+                if (living.level.random.nextInt(6000) == 0) living.spawnAtLocation(new ItemStack(Items.FEATHER));
             }
         }
     }
@@ -72,26 +70,24 @@ public class CrimsonShears {
 
         World world = event.getWorld();
 
-        if (!world.isRemote) {
+        if (!world.isClientSide()) {
             PlayerEntity player = event.getPlayer();
 
             // TODO: Choose corresponding grass item and dirt types of biome?
 
-            if (player.inventory.getCurrentItem().getItem() instanceof ShearsItem) {
+            if (player.inventory.getSelected().getItem() instanceof ShearsItem) {
                 BlockPos pos = event.getPos();
 
                 if (world.getBlockState(pos).getBlock() instanceof GrassBlock) {
-                    player.swing(player.getActiveHand(), true);
-                    world.playSound(null, pos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.BLOCKS, 1f, 1f);
+                    player.swing(player.getUsedItemHand(), true);
+                    world.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundCategory.BLOCKS, 1f, 1f);
 
-                    world.addEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.GRASS)));
+                    world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(Items.GRASS)));
 
-                    // .damageItem checks for Creative mode !
-                    player.inventory.getCurrentItem().damageItem(1, player, (playerIn) -> {
-                        playerIn.sendBreakAnimation(player.inventory.player.getActiveHand()); });
+                    player.inventory.getSelected().hurtAndBreak(1, player, (playerIn) -> { playerIn.broadcastBreakEvent(EquipmentSlotType.MAINHAND); });
 
-                    world.setBlockState(pos, Blocks.DIRT.getDefaultState(),1+2);
-                    world.playSound(null, pos, SoundEvents.BLOCK_GRASS_BREAK, SoundCategory.BLOCKS, 1f, 1f);
+                    world.setBlock(pos, Blocks.DIRT.defaultBlockState(),1+2);
+                    world.playSound(null, pos, SoundEvents.GRASS_BREAK, SoundCategory.BLOCKS, 1f, 1f);
                 }
             }
         }
@@ -101,10 +97,10 @@ public class CrimsonShears {
     public void onRightClickEntity(PlayerInteractEvent.EntityInteract event) {
         World world = event.getWorld();
 
-        if (!world.isRemote) {
+        if (!world.isClientSide()) {
             PlayerEntity player = event.getPlayer();
 
-            if (player.inventory.getCurrentItem().getItem() instanceof ShearsItem) {
+            if (player.inventory.getSelected().getItem() instanceof ShearsItem) {
                 dedupe++;
                 if (dedupe == 2) {
                     dedupe = 0;
@@ -112,11 +108,8 @@ public class CrimsonShears {
                 }
 
                 Entity living = event.getTarget();
-                if (((LivingEntity) living).isChild())
-                    if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) {
-                        //CrimsonShears.LOGGER.info("NO BABIES !");
-                        return;
-                    }
+                if (((LivingEntity) living).isBaby())
+                    if (!CrimsonShears.CONFIGURATION.ShearBabies.get()) return;
 
                 int intDamageAmount = 0;
                 Item item = null;
@@ -206,8 +199,8 @@ public class CrimsonShears {
                             item = Items.BONE;
                             intDamageAmount = 4;
                         }
-//                        player.sendStatusMessage(new StringTextComponent("ENTITY: " + living.getClass().getSimpleName()), false);
-//                        player.sendStatusMessage(new StringTextComponent("ENTITY: " + living.getClass().getTypeName()), false);
+//                        player.sendMessage(new StringTextComponent("ENTITY: " + living.getClass().getSimpleName()), Util.NIL_UUID);
+//                        player.sendMessage(new StringTextComponent("ENTITY: " + living.getClass().getTypeName()), Util.NIL_UUID);
                     }
                 }
 
@@ -251,20 +244,18 @@ public class CrimsonShears {
 
                     // NOTE: If holding carrot in OFF_HAND and use shears, the carrots will animate arm swing -
                     // can this be stopped?
-                    Hand handIn = (player.getHeldItem(Hand.MAIN_HAND) == player.inventory.getCurrentItem()) ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                    Hand handIn = (player.getItemInHand(Hand.MAIN_HAND) == player.inventory.getSelected()) ? Hand.MAIN_HAND : Hand.OFF_HAND;
                     //player.setActiveHand(handIn);
                     player.swing(handIn, true);
 
-                    world.playSound(null, pos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
+                    world.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
+                    world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), new ItemStack(item)));
 
-                    // .damageItem checks for Creative mode !
-                    player.inventory.getCurrentItem().damageItem(1, player, (playerIn) -> {
-                        playerIn.sendBreakAnimation(handIn); });
+                    player.inventory.getSelected().hurtAndBreak(1, player, (playerIn) -> { playerIn.broadcastBreakEvent(EquipmentSlotType.MAINHAND); });
 
-                    living.attackEntityFrom(dm, intDamageAmount);
-                    ((ServerWorld) world).spawnParticle(ParticleTypes.CRIT, living.getPosX(), living.getPosY() + living.getEyeHeight(), living.getPosZ(), 10, 0.5,0.5,0.5,0);
+                    living.hurt(dm, intDamageAmount);
+                    ((ServerWorld) world).sendParticles(ParticleTypes.CRIT, event.getPos().getX(), event.getPos().getY() + living.getEyeHeight(), event.getPos().getZ(), 10, 0.5,0.5,0.5,0);
 
-                    living.entityDropItem(new ItemStack(item));
 
         // TODO: Stop this event firing Twice  (hence dedupe integer above !)
 
